@@ -1,0 +1,106 @@
+unit uFrmEditarLembrete;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.ComCtrls, Vcl.StdCtrls,
+  Vcl.ExtCtrls, uLembreteDAO, uLembrete;
+
+type
+  TFrmEditar = class(TForm)
+    Label1: TLabel;
+    Panel1: TPanel;
+    EdtTitulo: TEdit;
+    MDescricao: TMemo;
+    Label2: TLabel;
+    Label3: TLabel;
+    DTData: TDateTimePicker;
+    BtnSalvar: TSpeedButton;
+    BtnExcluir: TSpeedButton;
+    DTHora: TDateTimePicker;
+    procedure FormDestroy(Sender: TObject);
+    procedure BtnExcluirClick(Sender: TObject);
+    procedure BtnSalvarClick(Sender: TObject);
+  private
+    { Private declarations }
+    LembreteDAO: TLembreteDAO;
+    Lembrete: TLembrete;
+    procedure PreencherLembrete;
+    procedure PreencherTela;
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent; pLembrete: TLembrete);
+  end;
+
+var
+  FrmEditarLembrete: TFrmEditar;
+
+implementation
+
+{$R *.dfm}
+{ TFrmEditar }
+
+procedure TFrmEditar.BtnExcluirClick(Sender: TObject);
+begin
+  LembreteDAO.Deletar(Lembrete);
+  ShowMessage('Registro Deletado com Sucesso!!!');
+  Close;
+end;
+
+procedure TFrmEditar.BtnSalvarClick(Sender: TObject);
+begin
+  PreencherLembrete;
+  if LembreteDAO.Alterar(Lembrete) then
+  begin
+    ShowMessage('Registro Editado com Sucesso!!!');
+    Close;
+  end;
+end;
+
+constructor TFrmEditar.Create(AOwner: TComponent; pLembrete: TLembrete);
+begin
+  inherited Create(AOwner);
+  LembreteDAO := TLembreteDAO.Create;
+
+  try
+    if Assigned(pLembrete) then
+    begin
+      Lembrete := pLembrete;
+      PreencherTela;
+    end;
+  except
+    on e: Exception do
+      raise Exception.Create(e.Message);
+  end;
+end;
+
+procedure TFrmEditar.FormDestroy(Sender: TObject);
+begin
+  Try
+    if Assigned(LembreteDAO) then
+      FreeAndNil(LembreteDAO);
+    if Assigned(Lembrete) then
+      FreeAndNil(Lembrete);
+  except
+    on e: Exception do
+      raise Exception.Create(e.Message);
+  End;
+end;
+
+procedure TFrmEditar.PreencherLembrete;
+begin
+  Lembrete.titulo := EdtTitulo.Text;
+  Lembrete.descricao := MDescricao.Lines.Text;
+  Lembrete.dataHora := DTDataHora.DateTime;
+end;
+
+procedure TFrmEditar.PreencherTela;
+begin
+  EdtTitulo.Text := Lembrete.titulo;
+  MDescricao.Lines.Text := Lembrete.descricao;
+  DTDataHora.DateTime := Lembrete.dataHora;
+end;
+
+end.
